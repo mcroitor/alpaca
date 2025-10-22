@@ -28,7 +28,7 @@ $client->setModelName($modelName);
 $logger->debug("Using model: {$modelName}\n");
 
 
-do{
+do {
     // read from stdin
     $logger->info("Enter prompt (or 'exit' to quit): ");
     $prompt = trim(fgets(STDIN));
