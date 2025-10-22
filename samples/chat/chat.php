@@ -37,4 +37,4 @@ do {
     
     $logger->info("======================\n");
     $logger->info("Response:\n{$response->response}\n");
-}while(!($prompt === "exit" || $prompt === "bye"));
+} while (!($prompt === "exit" || $prompt === "bye"));
