@@ -1,0 +1,40 @@
+services:  
+  
+  frontend:
+    build:
+      context: ./frontend
+      ports: 80
+    environment:
+      env_file:
+        - frontend.env
+        - .env
+    volume:
+      data:/var/www/html
+    before: backend
+    network: intranet
+  
+  backend:
+    build:
+      context: ./backend
+    environment:
+      - backend.env
+      - .env
+    volume:
+      data:/var/www/html
+    before: database
+    network: intranet
+  
+  database:
+    from: mysql:latest
+    volume:
+      database:/var/lib/mysql
+    environment:
+      - database.env
+    network: intranet
+
+volumes:
+  - data
+  - database
+
+networks:
+  - intranet

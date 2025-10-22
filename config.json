@@ -1,0 +1,16 @@
+[
+    {
+        "user": "mcroitor",
+        "repository": "logger",
+        "entrypoint": "mc/logger.php",
+        "source": "src",
+        "destination": "lib/logger"
+    },
+    {
+        "user": "mcroitor",
+        "repository": "mc-http",
+        "destination": "lib/mc-http",
+        "branch": "main",
+        "source": "."
+    }
+]
