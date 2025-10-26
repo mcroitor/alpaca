@@ -37,7 +37,7 @@ if (!is_dir($output_folder)) {
 }
 
 // load grading scale / rubric
-if(isset($config['rubric_file'])) {
+if (isset($config['rubric_file'])) {
     $rubricContent = file_get_contents(__DIR__ . "/" . $config['rubric_file']);
 } else {
     $rubricContent = [];
