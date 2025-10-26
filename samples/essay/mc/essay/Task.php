@@ -52,7 +52,7 @@ EOT;
         $this->rubric = $task['rubric'] ?? self::RUBRIC;
         $this->taskDescription = $task['description'] ?? '';
         $this->maxScore = $task['max_score'] ?? 20;
-        $this->promptTemplate = $template ?? self::PROMPT_TEMPLATE;
+        $this->promptTemplate = !empty($template) ? $template : self::PROMPT_TEMPLATE;
     }
 
     public function getTaskName(): string
