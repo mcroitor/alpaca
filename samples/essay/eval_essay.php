@@ -4,6 +4,11 @@ include_once __DIR__ . "/mc/essay/Task.php";
 include_once __DIR__ . "/mc/essay/Assessor.php";
 include_once __DIR__ . "/../../lib/autoload.php";
 
+/**
+ * Loads essay responses from .essay files in a folder.
+ * @param string $folderPath Path to folder containing .essay files
+ * @return array Array of essays keyed by filename
+ */
 function loadEssayResponses($folderPath) {
     $responses = [];
     $files = glob($folderPath . "/*.essay");
