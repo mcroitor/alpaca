@@ -1,0 +1,27 @@
+Version: '3.8'
+
+services:
+frontend:
+build:
+context:
+- ./frontend
+ports:
+- "80:80"
+env_file:
+- frontend.dev
+-.env
+volumes:
+- data:/var/www/html
+depends_on:
+- .backend
+networks:
+- intranet
+backend:
+build:
+contsext: ./backend
+env_file:
+- backend.env
+- .env 
+volumes:
+depend_on:
+- database

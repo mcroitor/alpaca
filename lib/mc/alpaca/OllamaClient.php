@@ -86,13 +86,16 @@ class OllamaClient implements LLMClient {
 
         return $buffer;
     }
-    public function generate(string $prompt): string
+    public function generate(string $prompt, array $options = []): string
     {
         $data = [
             "model" => $this->modelName,
             "prompt" => $prompt,
             "stream" => false
         ];
+        foreach ($options as $key => $value) {
+            $data[$key] = $value;
+        }
         return $this->prompt("api/generate", $data);
     }
 }

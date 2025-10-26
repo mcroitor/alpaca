@@ -1,0 +1,25 @@
+# Essay Task: {{task_name}}
+
+Assess the Student Response based on the below rubric and provide scores for each criterion in the table format.
+
+Table Format:
+
+| Criterion | Score |
+|-----------|-------|
+| criterion |       |
+
+Provide also a total score out of {{max_score}}.
+
+No other text outside the table format.
+
+## Task Description
+
+{{task_description}}
+
+## Evaluation rubric
+
+{{rubric}}
+
+## Student Response
+
+{{student_response}}

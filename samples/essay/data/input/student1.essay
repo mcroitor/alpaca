@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+     context: ./frontend
+      ports:
+        - "80:80"
+      env_file:
+        - .env
+        - frontend.env
+      networks:
+        - intranet
+      depends_on:
+        - backend
+
+    backend:
+      build:
+       context: ./backend
+        env_file:
+          - .env
+          - backend.env
+        volumes:
+          - data:/var/www/html
+        depends_on:
+          - database
+        networks:
+          - intranet
+
+  database:
+    build:
+      image: mysql:latest
+      volumes:
+        - database:/var/lib/mysql
+       env_file:
+         - database.env
+       networks:
+         - intranet
+
+volumes:
+  data:{}
+  database:{}
+
+networks:
+  intranet:{}
