@@ -109,7 +109,7 @@ if (file_exists($configFile)) {
         exit(1);
     }
     $config = $configData;
-} else if (isset($cliConfig['config_file'])) {
+} elseif (isset($cliConfig['config_file'])) {
     // Only show error if user explicitly specified a config file that doesn't exist
     $logger->error("Configuration file '{$configFile}' not found");
     exit(1);
