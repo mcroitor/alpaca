@@ -1,8 +1,7 @@
 {
     "models": ["cogito:14b"],
-    "task_name": "Docker Compose File Creation",
-    "task_definition_file": "data/task_definition.md",
-    "rubric_file": "data/analytical_rubric.md",
-    "input_directory": "data/input",
-    "output_directory": "data/output"
+    "task_name": "Dockerfile",
+    "task_definition_file": "data/essay2/task.md",
+    "input_directory": "data/essay2/input",
+    "output_directory": "data/essay2/output"
 }
