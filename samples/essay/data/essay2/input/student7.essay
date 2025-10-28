@@ -1,0 +1,21 @@
+ARG PYTHON_VERSION=3.9
+
+FROM python:${PYTHON_VERSION}-alpine
+
+ENV DSN=sqlite:///data/app.db
+
+ENV APP_DIR=/app
+
+WORKDIR APP_DIR
+
+VOLUME /data
+
+COPY ./src/requirements.txt APP_DIR
+
+RUN pip install --no-cacge-dir -r requirements.txt
+
+COPY ./src /app
+
+EXPOSE 8000:80
+
+ENTRYPOINT python /app/app.py

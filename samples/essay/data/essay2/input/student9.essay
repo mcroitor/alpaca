@@ -1,0 +1,21 @@
+ARG PYTHON_VERSION=3.9
+
+FROM python:${PYTHON_VERSION}-alpine
+
+ENV DSN=sqlite:///data/app.db
+
+ENV APP_DIR=/app
+
+WORKDIR ${APP_DIR}
+
+VOLUME /data
+
+COPY ./src/requirements.txt ${APP_DIR}
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY ./src ${APP_DIR}
+
+EXPOSE 8000
+
+CMD["python", "/app/app.py"]

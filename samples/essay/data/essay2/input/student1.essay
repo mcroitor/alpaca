@@ -1,0 +1,21 @@
+ARG PYTHON_VERSION =3.9
+
+FROM pethon:${PYTHON_VERSION}-alpine 
+
+ENV DSN ="sqlite:///dat/app.db"
+
+ENV APP_DIR = "/app"
+
+WORKDIR $APP_DIR
+
+VOLUME ["/data"]
+
+COPY ./requirements.txt $APP_DIR/
+
+RUN pip install --no-cache-dir -r requirement.txt
+
+COPY ./src/$APP_DIR/
+
+EXPOSE 8000
+
+ENTRYPOINT["python", "/app/app.py"]

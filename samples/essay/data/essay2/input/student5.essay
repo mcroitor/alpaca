@@ -1,0 +1,13 @@
+ARG PYTHON_VERSION=3.9
+
+ENV DSN=sqlite:///data/app.db
+
+ENV APP_DIR=/app
+
+VOLUMES /data
+
+COPY requiments.txt
+
+COPY ./src
+
+EXPOSE 8000

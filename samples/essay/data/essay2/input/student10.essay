@@ -1,0 +1,17 @@
+ARG PYTHON_VERSION=3.9
+
+ARG APP_DIR=/app
+
+ARG DSN=sqlite:///data/app.db
+
+WORKDIR ${APP_DIR}
+
+COPY ./src/requirements.txt APP_DIR
+
+pip install --no-cache-dir -r requirements.txt
+
+COPY ./src/* /app
+
+expose 8000
+
+python /app/app.py

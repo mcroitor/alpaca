@@ -48,10 +48,10 @@ EOT;
 
     public function __construct(array $task, string $template)
     {
-        $this->taskName = $task['name'] ?? 'A task';
+        $this->taskName = $task['task_name'] ?? 'A task';
         $this->rubric = $task['rubric'] ?? self::RUBRIC;
-        $this->taskDescription = $task['description'] ?? '';
-        $this->maxScore = $task['max_score'] ?? 20;
+        $this->taskDescription = $task['task_description'] ?? '';
+        $this->maxScore = $task['max_score'] ?? 100;
         $this->promptTemplate = !empty($template) ? $template : self::PROMPT_TEMPLATE;
     }
 
@@ -75,13 +75,24 @@ EOT;
     public function buildPrompt(string $studentEssay): string
     {
         $prompt = $this->promptTemplate;
-        $prompt = str_replace('{{task_name}}', $this->taskName, $prompt);
-        $prompt = str_replace('{{student_response}}', $studentEssay, $prompt);
 
-        $prompt = str_replace('{{rubric}}', $this->rubric, $prompt);
-
-        $prompt = str_replace('{{task_description}}', $this->taskDescription, $prompt);
-        $prompt = str_replace('{{max_score}}', (string)$this->maxScore, $prompt);
+        $from = [
+            "{{task_name}}",
+            "{{student_response}}",
+            "{{rubric}}",
+            "{{task_description}}",
+            "{{max_score}}",
+            "{{score_formatting}}"
+        ];
+        $to = [
+            $this->taskName,
+            $studentEssay,
+            $this->rubric,
+            $this->taskDescription,
+            (string)$this->maxScore,
+            "| criterion |       |"
+        ];
+        $prompt = str_replace($from, $to, $prompt);
 
         return $prompt;
     }
