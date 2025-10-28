@@ -2,10 +2,56 @@
 
 namespace mc\alpaca;
 
+/**
+ * Interface for Large Language Model clients
+ * 
+ * This interface defines the contract for all LLM client implementations,
+ * providing a standardized way to interact with different LLM providers
+ * such as Ollama, OpenAI, Anthropic, etc.
+ * 
+ * @package mc\alpaca
+ * @author Mihail Croitor <mcroitor@gmail.com>
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 interface LLMClient {
-    // LLMClient implementation
+    
+    /**
+     * Initialize the LLM client with API configuration
+     * 
+     * @param string $apiUrl The base URL for the LLM API endpoint
+     * @param string $apiKey Optional API key for authentication (default: empty)
+     * 
+     * @throws \InvalidArgumentException When apiUrl is invalid
+     */
     public function __construct(string $apiUrl, string $apiKey = "");
+    
+    /**
+     * Get the API key used for authentication
+     * 
+     * @return string The API key, or empty string if not set
+     */
     public function getApiKey(): string;
+    
+    /**
+     * Get the base API URL
+     * 
+     * @return string The configured API URL
+     */
     public function getApiUrl(): string;
+    
+    /**
+     * Generate text response from the language model
+     * 
+     * This is the core method for interacting with the LLM.
+     * It sends a prompt to the model and returns the generated response.
+     * 
+     * @param string $prompt The input prompt to send to the model
+     * 
+     * @return string The generated response from the model
+     * 
+     * @throws \RuntimeException When the API request fails
+     * @throws \InvalidArgumentException When prompt is empty
+     */
     public function generate(string $prompt): string;
 }
