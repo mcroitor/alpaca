@@ -20,11 +20,12 @@ interface LLMClient {
      * Initialize the LLM client with API configuration
      * 
      * @param string $apiUrl The base URL for the LLM API endpoint
+     * @param string $modelName The name of the model to use (default: "llama3.2:latest")
      * @param string $apiKey Optional API key for authentication (default: empty)
      * 
      * @throws \InvalidArgumentException When apiUrl is invalid
      */
-    public function __construct(string $apiUrl, string $apiKey = "");
+    public function __construct(string $apiUrl, string $modelName = "llama3.2:latest", string $apiKey = "");
     
     /**
      * Get the API key used for authentication
