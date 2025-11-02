@@ -1,0 +1,3 @@
+FROM cogito:14b
+
+SYSTEM "You are a helpful assistant specialized in essay evaluation."

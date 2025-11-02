@@ -7,7 +7,8 @@ include_once __DIR__ . "/../../lib/autoload.php";
 /**
  * Prints usage information for the script.
  */
-function printUsage(string $scriptName): void {
+function printUsage(string $scriptName): void
+{
     echo "Usage: php {$scriptName} [options]\n";
     echo "Script to evaluate essay responses using language models via Ollama.\n";
     echo "Script options allows to override config settings.\n\n";
@@ -27,8 +28,9 @@ function printUsage(string $scriptName): void {
  * @param string $path Path to check
  * @return bool True if path is absolute, false otherwise
  */
-function is_absolute_path(string $path): bool {
-    return (DIRECTORY_SEPARATOR === '\\') 
+function is_absolute_path(string $path): bool
+{
+    return (DIRECTORY_SEPARATOR === '\\')
         ? (preg_match('/^[a-zA-Z]:/', $path) || substr($path, 0, 2) === '\\\\')
         : (substr($path, 0, 1) === '/');
 }
@@ -38,7 +40,8 @@ function is_absolute_path(string $path): bool {
  * @param string $folderPath Path to folder containing .essay files
  * @return array Array of essays keyed by filename
  */
-function loadEssayResponses(string $folderPath): array {
+function loadEssayResponses(string $folderPath): array
+{
     $responses = [];
     $files = glob("{$folderPath}/*.essay");
     foreach ($files as $file) {
@@ -59,7 +62,7 @@ $longopts = [
     "config:",
     "server:",
     "input:",
-    "output:", 
+    "output:",
     "rubric:",
     "taskdef:",
     "models:"
@@ -142,8 +145,8 @@ if (empty($models)) {
 $logger->info("Using models: " . implode(", ", $models));
 
 // output folder
-$output_folder = isset($config['output_directory']) ? 
-    (is_absolute_path($config['output_directory']) ? $config['output_directory'] : __DIR__ . "/" . $config['output_directory']) : 
+$output_folder = isset($config['output_directory']) ?
+    (is_absolute_path($config['output_directory']) ? $config['output_directory'] : __DIR__ . "/" . $config['output_directory']) :
     __DIR__ . "/data/output";
 if (!is_dir($output_folder)) {
     mkdir($output_folder, 0777, true);
@@ -198,8 +201,8 @@ $logger->info("Essay task prompt:");
 $logger->info($essayTask->buildPrompt(""));
 
 $logger->info("Loading essay responses...");
-$input_folder = isset($config['input_directory']) ? 
-    (is_absolute_path($config['input_directory']) ? $config['input_directory'] : __DIR__ . "/" . $config['input_directory']) : 
+$input_folder = isset($config['input_directory']) ?
+    (is_absolute_path($config['input_directory']) ? $config['input_directory'] : __DIR__ . "/" . $config['input_directory']) :
     __DIR__ . "/data/input";
 
 if (!is_dir($input_folder)) {
@@ -211,34 +214,31 @@ $logger->info("Input directory: {$input_folder}");
 $responses = loadEssayResponses($input_folder);
 $logger->info("Loaded " . count($responses) . " essay responses.");
 
+$nr_evaluations = 1;
+
 $logger->info("Starting essay assessments...");
-foreach ($models as $model) {
-    $logger->info("Assessing with model: {$model}");
-    $client->setModelName($model);
 
-    // create the essay assessor
-    $assessor = new \mc\essay\Assessor($client);
-    $model_name = str_replace([":", ".", "/"], "_", $model);
-    if (!is_dir("{$output_folder}/{$model_name}")) {
-        mkdir("{$output_folder}/{$model_name}", 0777, true);
-    }
+for ($i = 0; $i < $nr_evaluations; $i++) {
+    $logger->info("Evaluation round " . ($i + 1) . " of " . $nr_evaluations);
+    foreach ($models as $model) {
+        $logger->info("Assessing with model: {$model}");
+        $client->setModelName($model);
 
-    // assess the essay
-    foreach ($responses as $key => $response) {
-        $score = $assessor->assessEssay($essayTask, $response);
-        $logger->info("Student {$key}");
-        $logger->info("----------------------");
-        $logger->info("Assessed with: {$score}");
-        // create student folder if not exists
-        if (!is_dir("{$output_folder}/{$model_name}/{$key}")) {
-            mkdir("{$output_folder}/{$model_name}/{$key}", 0777, true);
+        // create the essay assessor
+        $assessor = new \mc\essay\Assessor($client);
+
+        // leave one;
+        $responses = ["test" => $responses['student5']];
+        // assess the essay
+        foreach ($responses as $key => $response) {
+            $score = $assessor->assessEssay($essayTask, $response);
+            $logger->info("Student {$key}");
+            $logger->info("----------------------");
+            $logger->info("Assessed with: {$score}");
+            $model_name = str_replace([":", ".", "/"], "_", $model);
+            file_put_contents("{$output_folder}/essay_{$key}_{$model_name}_{$i}.md", $score);
         }
-        // count essay files in student folder
-        $essayFiles = glob("{$output_folder}/{$model_name}/{$key}/essay_*.md");
-        $essayCount = count($essayFiles);
-        $id = $essayCount + 1;
-        file_put_contents("{$output_folder}/{$model_name}/{$key}/essay_eval_{$id}.md", $score);
+        $logger->info("======================");
     }
-    $logger->info("======================");
 }
 $logger->info("Essay assessments completed.");
