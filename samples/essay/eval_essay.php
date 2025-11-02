@@ -234,7 +234,7 @@ foreach ($models as $model) {
             mkdir("{$output_folder}/{$model_name}/{$key}", 0777, true);
         }
         // count essay files in student folder
-        $essayFiles = glob("{$output_folder}/{$model_name}/{$key}/essay_*.md");
+        $essayFiles = glob("{$output_folder}/{$model_name}/{$key}/essay_eval_*.md");
         $essayCount = count($essayFiles);
         $id = $essayCount + 1;
         file_put_contents("{$output_folder}/{$model_name}/{$key}/essay_eval_{$id}.md", $score);
