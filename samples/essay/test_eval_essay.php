@@ -227,8 +227,6 @@ for ($i = 0; $i < $nr_evaluations; $i++) {
         // create the essay assessor
         $assessor = new \mc\essay\Assessor($client);
 
-        // leave one;
-        $responses = ["test" => $responses['student5']];
         // assess the essay
         foreach ($responses as $key => $response) {
             $score = $assessor->assessEssay($essayTask, $response);
