@@ -1,5 +1,5 @@
 {
-    "models": ["cogito:14b"],
+    "models": ["mymodel:latest"],
     "task_name": "Dockerfile",
     "task_definition_file": "data/essay2/task.md",
     "input_directory": "data/essay2/input",

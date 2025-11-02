@@ -9,6 +9,14 @@
 - [ ] __feat/001__ Stream responses support
 - [ ] __feat/002__ Parsing responses by template
 - [ ] __feat/003__ Training models with custom data
+  - [ ] __feat/003a__ Research Ollama custom model capabilities
+  - [ ] __feat/003b__ Create CustomDataManager class for data handling
+  - [ ] __feat/003c__ Implement basic RAG (Retrieval-Augmented Generation) system
+  - [ ] __feat/003d__ Add vector similarity search for document retrieval
+  - [ ] __feat/003e__ Create ModelTrainer interface for different training approaches
+  - [ ] __feat/003f__ Implement few-shot learning prompt enhancement
+  - [ ] __feat/003g__ Add support for Ollama Modelfile creation
+  - [ ] __feat/003h__ Create CLI tools for data management and model training
 - [ ] __feat/004__ Support for system prompts in chat interactions
 
 #### Testing Infrastructure
@@ -206,4 +214,4 @@ To contribute to this project:
 - Each task should include proper testing and documentation
 - Breaking changes should be clearly marked and documented
 
-Last updated: October 26, 2025
+Last updated: October 29, 2025
