@@ -55,11 +55,26 @@ function loadEssayResponses(string $folderPath): array {
 
 function loadTask(string $configFile): Task {
     $taskConfig = json_decode(file_get_contents($configFile), true);
+
+    $configDir = dirname($configFile);
+
+    // Helper to resolve relative paths
+    $resolvePath = function($path) use ($configDir) {
+        if ($path === null) return null;
+        return is_absolute_path($path) ? $path : $configDir . DIRECTORY_SEPARATOR . $path;
+    };
+
+    $taskFile = $resolvePath($taskConfig['task_file'] ?? null);
+    $rubricFile = $resolvePath($taskConfig['rubric_file'] ?? null);
+    $guidelinesFile = $resolvePath($taskConfig['guidelines_file'] ?? null);
+
     return new Task(
         [
             "task_name" => $taskConfig['task_name'] ?? "A task",
-            "task_description" => file_get_contents($taskConfig['task_file']),
-            "rubric" => file_get_contents($taskConfig['rubric_file']),
+            "task_description" => $taskFile ? file_get_contents($taskFile) : "",
+            "rubric" => $rubricFile ? file_get_contents($rubricFile) : "",
+            "evaluation_guidelines" => $guidelinesFile ? file_get_contents($guidelinesFile) : "",
+            "max_score" => $taskConfig['max_score'] ?? null,
         ]
     );
 }
