@@ -48,11 +48,13 @@ interface LLMClient {
      * It sends a prompt to the model and returns the generated response.
      * 
      * @param string $prompt The input prompt to send to the model
+     * @param array $options Optional generation parameters (system prompt,
+     *                      data format, temperature, etc.)
      * 
      * @return string The generated response from the model
      * 
      * @throws \RuntimeException When the API request fails
      * @throws \InvalidArgumentException When prompt is empty
      */
-    public function generate(string $prompt): string;
+    public function generate(string $prompt, array $options = []): string;
 }

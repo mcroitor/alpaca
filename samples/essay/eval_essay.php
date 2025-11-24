@@ -4,6 +4,11 @@ include_once __DIR__ . "/mc/essay/Task.php";
 include_once __DIR__ . "/mc/essay/Assessor.php";
 include_once __DIR__ . "/../../lib/autoload.php";
 
+
+use mc\alpaca\OllamaClient;
+use \mc\essay\Task;
+use \mc\essay\Assessor;
+
 /**
  * Prints usage information for the script.
  */
@@ -48,7 +53,17 @@ function loadEssayResponses(string $folderPath): array {
     return $responses;
 }
 
-use mc\alpaca\OllamaClient;
+function loadTask(string $configFile): Task {
+    $taskConfig = json_decode(file_get_contents($configFile), true);
+    return new Task(
+        [
+            "task_name" => $taskConfig['task_name'] ?? "A task",
+            "task_description" => file_get_contents($taskConfig['task_file']),
+            "rubric" => file_get_contents($taskConfig['rubric_file']),
+        ]
+    );
+}
+
 
 $logger = \mc\Logger::stdout();
 
@@ -150,38 +165,8 @@ if (!is_dir($output_folder)) {
 }
 $logger->info("Output directory: {$output_folder}");
 
-// load grading scale / rubric
-if (isset($config['rubric_file'])) {
-    $rubricFile = is_absolute_path($config['rubric_file']) ? $config['rubric_file'] : __DIR__ . "/" . $config['rubric_file'];
-    if (file_exists($rubricFile)) {
-        $rubricContent = file_get_contents($rubricFile);
-        $logger->info("Using rubric file: {$rubricFile}");
-    } else {
-        $logger->warn("Rubric file '{$rubricFile}' not found");
-        $rubricContent = "";
-    }
-} else {
-    $rubricContent = "";
-    $logger->info("No rubric file specified");
-}
-
-// task definition
-$taskDefinitionFile = "";
-if (isset($config['task_definition_file'])) {
-    $taskDefinitionFile = is_absolute_path($config['task_definition_file']) ?
-        $config['task_definition_file'] :
-        __DIR__ . "/" . $config['task_definition_file'];
-} else {
-    $logger->error("No task definition file specified in configuration");
-    exit(1);
-}
-
-if (!file_exists($taskDefinitionFile)) {
-    $logger->error("Task definition file '{$taskDefinitionFile}' not found");
-    exit(1);
-}
-$taskDefinitionContent = file_get_contents($taskDefinitionFile);
-$logger->info("Using task definition file: {$taskDefinitionFile}");
+// load task definition
+$taskConfig = json_decode(file_get_contents($config['task_config']), true);
 
 // define the essay task
 $essayTask = new \mc\essay\Task(
@@ -190,12 +175,12 @@ $essayTask = new \mc\essay\Task(
         "task_description" => $taskDefinitionContent,
         "rubric" => $rubricContent,
         "max_score" => 100
-    ],
-    file_get_contents(__DIR__ . "/templates/prompt.template")
-);
+    ]);
+
+$template = file_get_contents(__DIR__ . "/templates/prompt.template");
 
 $logger->info("Essay task prompt:");
-$logger->info($essayTask->buildPrompt(""));
+// $logger->info($essayTask->buildPrompt(""));
 
 $logger->info("Loading essay responses...");
 $input_folder = isset($config['input_directory']) ? 
@@ -217,7 +202,7 @@ foreach ($models as $model) {
     $client->setModelName($model);
 
     // create the essay assessor
-    $assessor = new \mc\essay\Assessor($client);
+    $assessor = new \mc\essay\Assessor($client, $template);
     $model_name = str_replace([":", ".", "/"], "_", $model);
     if (!is_dir("{$output_folder}/{$model_name}")) {
         mkdir("{$output_folder}/{$model_name}", 0777, true);
@@ -225,11 +210,6 @@ foreach ($models as $model) {
 
     // assess the essay
     foreach ($responses as $key => $response) {
-        $score = $assessor->assessEssay($essayTask, $response);
-        $logger->info("Student {$key}");
-        $logger->info("----------------------");
-        $logger->info("Assessed with: {$score}");
-        // create student folder if not exists
         if (!is_dir("{$output_folder}/{$model_name}/{$key}")) {
             mkdir("{$output_folder}/{$model_name}/{$key}", 0777, true);
         }
@@ -237,6 +217,13 @@ foreach ($models as $model) {
         $essayFiles = glob("{$output_folder}/{$model_name}/{$key}/essay_eval_*.md");
         $essayCount = count($essayFiles);
         $id = $essayCount + 1;
+
+        $logger->info("Student {$key}");
+        $logger->info("----------------------");
+        $logger->info("Assessed with:");
+
+        $score = $assessor->assessEssay($essayTask, $response);
+        // create student folder if not exists
         file_put_contents("{$output_folder}/{$model_name}/{$key}/essay_eval_{$id}.md", $score);
     }
     $logger->info("======================");

@@ -136,9 +136,18 @@ class OllamaClient implements LLMClient
             } else {
                 $buffer .= $data;
             }
-            return strlen($data);
+            return \strlen($data);
         });
+        self::tryAuthenticate($http);
         return $http;
+    }
+
+    private static function tryAuthenticate(\mc\http $http): void {
+        // if isset OLLAMA_API_KEY then set header
+        $apiKey = getenv('OLLAMA_API_KEY');
+        if ($apiKey) {
+            $http->set_option(CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $apiKey]);
+        }
     }
 
     /**
@@ -231,7 +240,7 @@ class OllamaClient implements LLMClient
      * 
      * @param string $prompt The input prompt to send to the model
      * @param array $options Optional parameters to customize generation
-     *                      (e.g., temperature, max_tokens, etc.)
+     *                      (e.g., system prompt, data format, temperature, etc.)
      * 
      * @return string Raw JSON response from the Ollama API
      * 
@@ -241,8 +250,8 @@ class OllamaClient implements LLMClient
      * @example
      * ```php
      * $response = $client->generate('Explain quantum computing', [
-     *     'temperature' => 0.7,
-     *     'max_tokens' => 100
+     *     'system' => "You are a helpful assistant.",
+     *     'options' => ["temperature" => 0.7]
      * ]);
      * ```
      */
