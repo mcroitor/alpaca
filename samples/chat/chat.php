@@ -8,7 +8,7 @@ include_once __DIR__ . "/../../lib/autoload.php";
 use mc\alpaca\OllamaClient;
 use mc\alpaca\OllamaResponse;
 
-$modelName = $argv[1] ?? "llama3.2:latest";
+$modelName = $argv[1] ?? "gemma3n:e4b";
 
 // set logger
 $logger = \mc\Logger::stdout();
@@ -32,7 +32,7 @@ do {
     // read from stdin
     $logger->info("Enter prompt (or 'exit' to quit): ");
     $prompt = trim(fgets(STDIN));
-    $responseJson = $client->generate($prompt);
+    $responseJson = $client->generate($prompt, ['stream' => true]);
     $response = OllamaResponse::fromJson($responseJson);
     
     $logger->info("======================\n");

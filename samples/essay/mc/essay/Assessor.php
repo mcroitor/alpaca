@@ -39,15 +39,31 @@ class Assessor
      * @var OllamaClient
      */
     private OllamaClient $llmClient;
+    /**
+     * HTTP request options for the LLM client (e.g., streaming, system role, model tuning).
+     * 
+     * @var array
+     */
+    private array $options = [];
+    /**
+     * Prompt template used for generating assessment prompts.
+     * 
+     * @var string
+     */
+    private string $template;
 
     /**
      * Initialize the assessment service
      * 
      * @param OllamaClient $llmClient Configured LLM client for generating assessments
+     * @param string $template Prompt template for assessment
      */
-    public function __construct(OllamaClient $llmClient)
+    public function __construct(OllamaClient $llmClient, string $template)
     {
         $this->llmClient = $llmClient;
+        $this->template = $template;
+        $this->setAssessorRole();
+        $this->setStreaming();
     }
 
     /**
@@ -64,6 +80,7 @@ class Assessor
      * 
      * @param \mc\essay\Task $task Task object containing assignment details and rubric
      * @param string $studentEssay The student's submission to be evaluated
+     * @param bool $useStructured Whether to use structured prompt for custom models
      * 
      * @return string Generated assessment text from the language model
      * 
@@ -85,10 +102,59 @@ class Assessor
      */
     public function assessEssay(\mc\essay\Task $task, string $studentEssay): string
     {
-        $prompt = $task->buildPrompt($studentEssay);
-        $response = $this->llmClient->generate($prompt);
+        $prompt = $task->buildPrompt($studentEssay, $this->template);
 
-        $responseObj = OllamaResponse::fromJson($response);
-        return $responseObj->response;
+        $response = $this->llmClient->generate($prompt, $this->options);
+
+        return $response;
+    }
+
+    /**
+     * Used for manipulate with request, for example enable / disable streaming,
+     * set up format etc. Check https://docs.ollama.com/api/generate
+     * @param string $option
+     * @param string $value
+     * @return void
+     */
+    public function setRequestOption(string $option, string $value): void {
+        $this->options[$option] = $value;
+    }
+
+    /**
+     * Used for setting model-tuning options:
+     * 
+     *  - temperature
+     *  - seed
+     *  - top_k
+     *  - top_p
+     *  - min_p
+     *  - stop
+     *  - num_ctx
+     *  - num_predict
+     * 
+     * @param array $options
+     * @return void
+     */
+    public function setModelOptions(array $options): void {
+        $this->options["options"] = $options;
+    }
+
+    /**
+     * Set the system role for the assessor
+     * 
+     * @return void
+     */
+    private function setAssessorRole(): void {
+        $this->setRequestOption('system', "You are an essay assessor.");
+    }
+
+    /**
+     * Enable streaming of responses from the language model
+     * 
+     * @param bool $stream Whether to enable streaming ("true" or "false")
+     * @return void
+     */
+    private function setStreaming(bool $stream = false): void {
+        $this->setRequestOption('stream', $stream ? "true" : "false");
     }
 }

@@ -26,22 +26,23 @@ use mc\alpaca\LLMClient;
  * echo $response;
  * ```
  */
-class OllamaClient implements LLMClient {
-    
+class OllamaClient implements LLMClient
+{
+
     /**
      * API key for authentication (currently not used by Ollama)
      * 
      * @var string
      */
     private string $apiKey;
-    
+
     /**
      * Base URL for the Ollama API server
      * 
      * @var string
      */
     private string $apiUrl;
-    
+
     /**
      * Name of the language model to use for generation
      * 
@@ -58,7 +59,8 @@ class OllamaClient implements LLMClient {
      * 
      * @throws \InvalidArgumentException When apiUrl is invalid
      */
-    public function __construct(string $apiUrl, string $modelName = "llama3.2:latest", string $apiKey = "") {
+    public function __construct(string $apiUrl, string $modelName = "llama3.2:latest", string $apiKey = "")
+    {
         $this->apiKey = $apiKey;
         $this->apiUrl = $apiUrl;
         $this->modelName = $modelName;
@@ -69,7 +71,8 @@ class OllamaClient implements LLMClient {
      * 
      * @return string The configured API key
      */
-    public function getApiKey(): string {
+    public function getApiKey(): string
+    {
         return $this->apiKey;
     }
 
@@ -78,7 +81,8 @@ class OllamaClient implements LLMClient {
      * 
      * @return string The configured API URL
      */
-    public function getApiUrl(): string {
+    public function getApiUrl(): string
+    {
         return $this->apiUrl;
     }
 
@@ -87,7 +91,8 @@ class OllamaClient implements LLMClient {
      * 
      * @return string The name of the currently selected model
      */
-    public function getModelName(): string {
+    public function getModelName(): string
+    {
         return $this->modelName;
     }
 
@@ -100,7 +105,8 @@ class OllamaClient implements LLMClient {
      * 
      * @throws \InvalidArgumentException When modelName is empty
      */
-    public function setModelName(string $modelName): void {
+    public function setModelName(string $modelName): void
+    {
         $this->modelName = $modelName;
     }
 
@@ -115,15 +121,33 @@ class OllamaClient implements LLMClient {
      * 
      * @return \mc\http Configured HTTP client instance
      */
-    private static function getHttpClient(string $uri, string &$buffer): \mc\http {
+    private static function getHttpClient(string $uri, string &$buffer, bool $stream = false): \mc\http
+    {
         $http = new \mc\http($uri);
         $http->set_encoder("json_encode");
-        // $http->set_option(CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
-        $http->set_write_function(function ($curl, $data) use (&$buffer): int {
-            $buffer .= $data;
-            return strlen($data);
+        $http->set_write_function(function ($curl, $data) use (&$buffer, $stream): int {
+            if ($stream) {
+                $object = json_decode($data);
+                if ($object->response) {
+                    $buffer .= $object->response;
+                    echo $object->response;
+                    flush();
+                }
+            } else {
+                $buffer .= $data;
+            }
+            return \strlen($data);
         });
+        self::tryAuthenticate($http);
         return $http;
+    }
+
+    private static function tryAuthenticate(\mc\http $http): void {
+        // if isset OLLAMA_API_KEY then set header
+        $apiKey = getenv('OLLAMA_API_KEY');
+        if ($apiKey) {
+            $http->set_option(CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $apiKey]);
+        }
     }
 
     /**
@@ -136,7 +160,8 @@ class OllamaClient implements LLMClient {
      * 
      * @throws \RuntimeException When the API request fails
      */
-    public function getModelsList(): array {
+    public function getModelsList(): array
+    {
         $models = [];
 
         $url = "{$this->apiUrl}/api/tags";
@@ -165,7 +190,8 @@ class OllamaClient implements LLMClient {
      * @throws \RuntimeException When the API request fails
      * @throws \InvalidArgumentException When modelName is empty
      */
-    public function getModelInfo(string $modelName): array{
+    public function getModelInfo(string $modelName): array
+    {
         $url = "{$this->apiUrl}/api/show";
         $buffer = "";
         $http = self::getHttpClient($url, $buffer);
@@ -197,14 +223,15 @@ class OllamaClient implements LLMClient {
     {
         $url = "{$this->apiUrl}/{$endpoint}";
         $buffer = "";
-        $http = self::getHttpClient($url, $buffer);
+        $stream = $data['stream'] ?? false;
+        $http = self::getHttpClient($url, $buffer, $stream);
         $response = $http->post(
             $data
         );
 
         return $buffer;
     }
-    
+
     /**
      * Generate text response from the language model
      * 
@@ -213,7 +240,7 @@ class OllamaClient implements LLMClient {
      * 
      * @param string $prompt The input prompt to send to the model
      * @param array $options Optional parameters to customize generation
-     *                      (e.g., temperature, max_tokens, etc.)
+     *                      (e.g., system prompt, data format, temperature, etc.)
      * 
      * @return string Raw JSON response from the Ollama API
      * 
@@ -223,8 +250,8 @@ class OllamaClient implements LLMClient {
      * @example
      * ```php
      * $response = $client->generate('Explain quantum computing', [
-     *     'temperature' => 0.7,
-     *     'max_tokens' => 100
+     *     'system' => "You are a helpful assistant.",
+     *     'options' => ["temperature" => 0.7]
      * ]);
      * ```
      */

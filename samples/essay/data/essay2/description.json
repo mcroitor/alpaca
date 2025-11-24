@@ -1,0 +1,7 @@
+{
+    "name": "Dockerfile Definition",
+    "task_file": "./task.md",
+    "rubric_file": "./rubric.md",
+    "guidelines_file": "./guidelines.md",
+    "max_score": 100
+}

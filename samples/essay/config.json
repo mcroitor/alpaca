@@ -1,7 +1,6 @@
 {
-    "models": ["mymodel:latest"],
-    "task_name": "Dockerfile",
-    "task_definition_file": "data/essay2/task.md",
+    "models": ["assessor:latest"],
+    "task_config": "data/essay2/description.json",
     "input_directory": "data/essay2/input",
     "output_directory": "data/essay2/output"
 }
