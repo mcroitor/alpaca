@@ -39,7 +39,17 @@ class Assessor
      * @var OllamaClient
      */
     private OllamaClient $llmClient;
+    /**
+     * HTTP request options for the LLM client (e.g., streaming, system role, model tuning).
+     * 
+     * @var array
+     */
     private array $options = [];
+    /**
+     * Prompt template used for generating assessment prompts.
+     * 
+     * @var string
+     */
     private string $template;
 
     /**
