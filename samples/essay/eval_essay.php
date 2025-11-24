@@ -185,8 +185,8 @@ if ($taskConfig === null && json_last_error() !== JSON_ERROR_NONE) {
 $essayTask = new \mc\essay\Task(
     [
         "task_name" => $config['task_name'] ?? "A task",
-        "task_description" => $taskDefinitionContent,
-        "rubric" => $rubricContent,
+        "task_description" => $taskConfig['task_description'] ?? "",
+        "rubric" => $taskConfig['rubric'] ?? "",
         "max_score" => 100
     ]);
 
