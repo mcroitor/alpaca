@@ -166,7 +166,20 @@ if (!is_dir($output_folder)) {
 $logger->info("Output directory: {$output_folder}");
 
 // load task definition
-$taskConfig = json_decode(file_get_contents($config['task_config']), true);
+if (!file_exists($config['task_config'])) {
+    $logger->error("Task config file not found: " . $config['task_config']);
+    exit(1);
+}
+$taskConfigContent = file_get_contents($config['task_config']);
+if ($taskConfigContent === false) {
+    $logger->error("Failed to read task config file: " . $config['task_config']);
+    exit(1);
+}
+$taskConfig = json_decode($taskConfigContent, true);
+if ($taskConfig === null && json_last_error() !== JSON_ERROR_NONE) {
+    $logger->error("Invalid JSON in task config file: " . $config['task_config'] . ". Error: " . json_last_error_msg());
+    exit(1);
+}
 
 // define the essay task
 $essayTask = new \mc\essay\Task(
